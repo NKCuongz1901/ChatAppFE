@@ -6,13 +6,27 @@ import { Chat } from '@/types/chatType'
 import { useAppSelector } from '@/app/hooks'
 import { selectAuth } from '@/features/auth/authSlice'
 import { Button } from '../ui/button'
-import { Info } from 'lucide-react'
+import { Info, Video } from 'lucide-react'
 import { Skeleton } from '../ui/skeleton'
 import GroupMembers from '../GroupMembers'
+import { useWebRTC } from '@/hooks/useWebRTC'
+import { useState } from 'react'
+import VideoCallModal from '../VideoCallModal/VideoCallModal'
 
 const ChatTopbar = () => {
   const { chatId } = useParams()
   const auth = useAppSelector(selectAuth)
+  const {
+    localStreamRef,
+    remoteStream,
+    incomingCaller,
+    inCallWith,
+    startCall,
+    acceptCall,
+    endCall,
+  } = useWebRTC()
+  const [isVideoCallModalOpen, setIsVideoCallModalOpen] =
+    useState<boolean>(false)
 
   const {
     data: chatResponse,
@@ -26,8 +40,26 @@ const ChatTopbar = () => {
   })
 
   const chat: Chat = chatResponse?.data
-
   const chatUsers = chat?.users?.filter((user) => user._id !== auth.user._id)
+  const peerId = !chat?.isGroup ? chatUsers?.[0]?._id : undefined
+
+  const onStartCall = async () => {
+    if (!peerId) return
+    await startCall({ selfId: auth.user._id, peerId })
+    setIsVideoCallModalOpen(true)
+  }
+
+  const onAcceptCall = async () => {
+    if (!incomingCaller) return
+    await acceptCall(auth.user._id, incomingCaller)
+    setIsVideoCallModalOpen(true)
+  }
+
+  const onEndCall = () => {
+    if (!inCallWith) return
+    endCall(auth.user._id)
+    setIsVideoCallModalOpen(false)
+  }
 
   return (
     <div className="w-full h-20 flex p-4 justify-between items-center border-b">
@@ -66,11 +98,38 @@ const ChatTopbar = () => {
         </div>
       )}
 
-      <GroupMembers>
-        <Button variant="ghost" size="icon">
-          <Info size={20} className="text-muted-foreground" />
+      <div className="flex gap-2">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onStartCall}
+          disabled={!peerId}
+        >
+          <Video size={20} className="text-muted-foreground" />
         </Button>
-      </GroupMembers>
+
+        <GroupMembers>
+          <Button variant="ghost" size="icon">
+            <Info size={20} className="text-muted-foreground" />
+          </Button>
+        </GroupMembers>
+      </div>
+
+      {incomingCaller && !inCallWith && (
+        <div className="absolute right-4 top-24 flex items-center gap-2 bg-white border rounded px-3 py-2 shadow">
+          <span>Cuộc gọi đến</span>
+          <Button onClick={onAcceptCall} size="sm">
+            Chấp nhận
+          </Button>
+        </div>
+      )}
+
+      <VideoCallModal
+        isOpen={isVideoCallModalOpen}
+        localStream={localStreamRef.current}
+        remoteStream={remoteStream}
+        onClose={onEndCall}
+      />
     </div>
   )
 }
