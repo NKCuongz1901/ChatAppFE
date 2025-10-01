@@ -5,6 +5,7 @@ import http from '@/utils/http'
 type LoginParam = {
   email: string
   password: string
+  code?: string
 }
 
 type RegisterParam = Omit<Auth, 'id' | 'avatar'>
@@ -39,6 +40,18 @@ const AuthServices = {
 
   updateAvatar: (param: { avatar: FileUploadResponse }) => {
     return http.put(PREV_URL + '/update-avatar', param)
+  },
+
+  enableTwoFA: () => {
+    return http.post(PREV_URL + '/enable-two-fa',{})
+  },
+
+  verifyTwoFACode: (param: { code: string }) => {
+    return http.post(PREV_URL + '/verify-two-fa', param)
+  },
+
+  disableTwoFA: () => {
+    return http.post(PREV_URL + '/disable-two-fa', {})
   },
 }
 

@@ -20,14 +20,17 @@ import { updateAuth } from '@/features/auth/authSlice'
 import { setAuthLS } from '@/utils/authLS'
 import { AuthResponse } from '@/types/authType'
 import { alertErrorAxios } from '@/utils/alert'
+import { useState } from 'react'
 
 const formSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
+  code: z.string().optional(),
 })
 
 const LoginPage = () => {
   const dispatch = useAppDispatch()
+  const [show2FA, setShow2FA] = useState(false)
 
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
@@ -35,6 +38,7 @@ const LoginPage = () => {
     defaultValues: {
       email: '',
       password: '',
+      code: undefined,
     },
   })
 
@@ -65,8 +69,12 @@ const LoginPage = () => {
 
         navigate('/')
       }, 1000)
-    } catch (error) {
-      alertErrorAxios(error)
+    } catch (error: any) {
+      if (error.response.data.message === 'Vui lòng nhập mã 2FA') {
+        setShow2FA(true)
+      }
+      toast.error(error.response.data.message)
+      return
     }
   }
 
@@ -104,6 +112,20 @@ const LoginPage = () => {
             </FormItem>
           )}
         />
+        {show2FA && (
+          <FormField
+            control={form.control}
+            name="code"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Input placeholder="mã 2FA" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
         <Button type="submit" className="w-full">
           Đăng nhập
         </Button>
