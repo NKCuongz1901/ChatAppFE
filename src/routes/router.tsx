@@ -12,6 +12,7 @@ import FriendPage from '@/pages/FriendPage'
 import ChatLayout from '@/layouts/ChatLayout'
 import ProfilePage from '@/pages/ProfilePage'
 import EventProvider from '@/providers/EventProvider'
+import LoginSessionPage from '@/pages/LoginSessionPage/LoginSessionPage'
 
 const router = createBrowserRouter([
   {
@@ -52,6 +53,10 @@ const router = createBrowserRouter([
           {
             path: 'profile',
             element: <ProfilePage />,
+          },
+          {
+            path: 'login-sessions',
+            element: <LoginSessionPage />,
           },
         ],
       },

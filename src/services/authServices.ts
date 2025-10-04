@@ -22,6 +22,8 @@ type HandleResetPasswordParam = {
 
 const PREV_URL = '/auth'
 
+const PREV_URL_LOGIN_SESSION = '/login-sessions'
+
 const AuthServices = {
   login: (param: LoginParam) => {
     return http.post(PREV_URL + '/login', param)
@@ -52,6 +54,10 @@ const AuthServices = {
 
   disableTwoFA: () => {
     return http.post(PREV_URL + '/disable-two-fa', {})
+  },
+
+  getLoginHistory: () => {
+    return http.get(PREV_URL_LOGIN_SESSION)
   },
 }
 

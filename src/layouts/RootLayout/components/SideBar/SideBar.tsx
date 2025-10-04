@@ -95,6 +95,9 @@ const SideBar = () => {
             <DropdownMenuItem asChild>
               <Link to={'/profile'}>Profile</Link>
             </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to={'/login-sessions'}>Lịch sử đăng nhập</Link>
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={handleLogout}>
               Đăng xuất
             </DropdownMenuItem>
